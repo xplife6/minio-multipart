@@ -1,5 +1,5 @@
 //分片大小 5m
-const chunkSize = 5 * 1024 * 1024;
+const chunkSize = 10 * 1024 * 1024;
 
 
 /**
@@ -44,22 +44,26 @@ uploadFile = async () => {
 
         console.log("向后端请求本次分片上传初始化")
         //向后端请求本次分片上传初始化
-        const initUploadParams = JSON.stringify({chunkSize: chunkCount,fileName: file.name})
+        const initUploadParams = JSON.stringify({chunkSize: chunkCount,fileName: file.name,md5:fileMd5})
         $.ajax({url: "http://127.0.0.1:8080/file/multipart/create", type: 'POST', contentType: "application/json", processData: false, data: initUploadParams,
             success: async function (res) {
+                console.log(res.data)
                 //code = 0 文件在之前已经上传完成，直接走秒传逻辑；code = 1 文件上传过，但未完成，走续传逻辑;code = 200 则仅需要合并文件
                 if (res.code === 200) {
                     console.log("当前文件上传情况：所有分片已在之前上传完成，仅需合并")
-                    composeFile(res.data.uploadId,file.name, chunkCount, fileSize, file.contentType)
+                    composeFile(res.data.uploadId,file.name, chunkCount, fileSize, file.contentType,res.data.uuid)
                     return;
                 }
-                if (res.code === 0) {
+                if (res.data.code === 101) {
                     console.log("当前文件上传情况：秒传")
-                    videoPlay(res.data.filePath,res.data.suffix)
+                    // videoPlay(res.data.filePath,res.data.suffix)
                     return
                 }
                 console.log("当前文件上传情况：初次上传 或 断点续传")
                 const chunkUploadUrls = res.data.chunks
+                console.log(chunkUploadUrls)
+
+                const upId= res.data.uploadId
 
                 //当前为顺序上传方式，若要测试并发上传，请将第52行 await 修饰符删除即可
                 //若使用并发上传方式，当前分片上传完成后打印出来的完成提示是不准确的，但这并不影响最终运行结果；原因是由ajax请求本身是异步导致的
@@ -67,18 +71,29 @@ uploadFile = async () => {
                     //分片开始位置
                     let start = (item.partNumber-1) * chunkSize
                     //分片结束位置
+
                     let end = Math.min(fileSize, start + chunkSize)
                     //取文件指定范围内的byte，从而得到分片数据
                     let _chunkFile = file.slice(start, end)
-                    console.log("开始上传第" + item.partNumber + "个分片")
-                    await $.ajax({url: item.uploadUrl, type: 'PUT', contentType: false, processData: false, data: _chunkFile,
-                        success: function (res) {
-                            console.log("第" + item.partNumber + "个分片上传完成")
-                        }
-                    })
+
+                    console.log("第"+item.partNumber+"个:"+item.flag)
+                    if (!item.flag){
+                        console.log("开始上传第" + item.partNumber + "个分片")
+                        await $.ajax({url: item.uploadUrl, type: 'PUT', contentType: false, processData: false, data: _chunkFile,
+                            success: function (res) {
+                                console.log("第" + item.partNumber + "个分片上传完成")
+                                console.log("show  id:"+upId)
+
+                                const params = JSON.stringify({uploadId: upId,chunkIndex: item.partNumber ,md5: fileMd5})
+                                $.ajax({url: "http://127.0.0.1:8080/chunkInfo/uploadInfo", type: 'PUT', contentType: "application/json", processData: false, data: params})
+
+                            }
+                        })
+                    }
+
                 }
                 //请求后端合并文件
-                composeFile(res.data.uploadId,file.name, chunkCount, fileSize, file.contentType)
+                composeFile(res.data.uploadId,file.name, chunkCount, fileSize, file.contentType,res.data.uuid)
             }
         })
     }
@@ -88,10 +103,11 @@ uploadFile = async () => {
  * @param fileMd5
  * @param fileName
  */
-composeFile = (uploadId,fileName, chunkSize, fileSize, contentType) => {
+composeFile = (uploadId,fileName, chunkSize, fileSize, contentType,uuidStr) => {
+    // debugger
     console.log("开始请求后端合并文件")
     //注意：bucketName请填写你自己的存储桶名称，如果没有，就先创建一个写在这
-    const composeParams = JSON.stringify({uploadId: uploadId,fileName: fileName,chunkSize: chunkSize, fileSize: fileSize, contentType: contentType, expire: 12, maxGetCount: 2})
+    const composeParams = JSON.stringify({uploadId: uploadId,fileName: fileName,chunkSize: chunkSize, fileSize: fileSize, contentType: contentType, expire: 12, maxGetCount: 2,uuid:uuidStr})
     $.ajax({url:  "http://127.0.0.1:8080/file/multipart/complete", type: 'POST', contentType: "application/json", processData: false, data: composeParams,
         success: function (res) {
             console.log("合并文件完成",res.data)

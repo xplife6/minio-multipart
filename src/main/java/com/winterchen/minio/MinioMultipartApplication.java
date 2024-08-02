@@ -1,9 +1,11 @@
 package com.winterchen.minio;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@MapperScan("com.winterchen.minio.mapper")
 public class MinioMultipartApplication {
 
     public static void main(String[] args) {

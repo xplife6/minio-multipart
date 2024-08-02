@@ -23,4 +23,11 @@ public class MultipartUploadCreateRequest {
     @ApiModelProperty("分片数量")
     private Integer chunkSize;
 
+    @ApiModelProperty("md5")
+    private String md5;
+
+    @ApiModelProperty("当前文件的uuid")
+    private String uuid;
+
+
 }

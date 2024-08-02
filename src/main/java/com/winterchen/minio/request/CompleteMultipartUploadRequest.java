@@ -13,6 +13,9 @@ import lombok.Data;
 @ApiModel("合并分片请求类")
 public class CompleteMultipartUploadRequest {
 
+    @ApiModelProperty("md5")
+    private String md5;
+
     @ApiModelProperty("文件名称")
     private String fileName;
 
@@ -37,6 +40,9 @@ public class CompleteMultipartUploadRequest {
 
     @ApiModelProperty("最大下载数")
     private Integer maxGetCount;
+
+    @ApiModelProperty("fileinfo的uuid")
+    private  String uuid;
 
 
 }

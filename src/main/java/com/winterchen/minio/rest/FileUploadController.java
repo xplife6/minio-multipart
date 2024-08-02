@@ -77,6 +77,8 @@ public class FileUploadController {
         return fileUploadService.completeMultipartUpload(uploadRequest);
     }
 
+
+
     @ApiOperation("文件删除")
     @DeleteMapping("/{fileName}")
     public void remove(
@@ -84,5 +86,15 @@ public class FileUploadController {
             String fileName
     ) {
         fileUploadService.remove(fileName);
+    }
+
+    @ApiOperation("获取已上传分片")
+    @PostMapping("/multipart/uploadlist")
+    public void uploadlist(
+            @RequestBody
+            @Validated
+            CompleteMultipartUploadRequest uploadRequest
+    ) {
+        fileUploadService.uploadlist(uploadRequest);
     }
 }

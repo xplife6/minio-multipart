@@ -1,5 +1,6 @@
 package com.winterchen.minio.response;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,13 @@ public class MultipartUploadCreateResponse {
     private List<UploadCreateItem> chunks;
 
 
+    @ApiModelProperty("返回编码")
+    private Integer code ;
+
+    @ApiModelProperty("返回uuid")
+    private String uuid ;
+
+
     @Data
     public static class UploadCreateItem {
 
@@ -36,6 +44,9 @@ public class MultipartUploadCreateResponse {
 
         @ApiModelProperty("上传地址")
         private String uploadUrl;
+
+        @ApiModelProperty("上传标记")
+        private Boolean flag;
 
     }
 

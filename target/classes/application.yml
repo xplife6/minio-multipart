@@ -10,14 +10,30 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  datasource:
+#    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true
+#    username: root
+#    password: root
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.93.245:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true
+    username: root
+    password: sono123
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
+#minio:
+#  endpoint: http://127.0.0.1:9100
+#  accessKey: minioadmin
+#  secretKey: minioadmin
+#  bucketName: share
+#  downloadUri: http://127.0.0.1:9101
+#  path: http://127.0.0.1:9100
 minio:
-  endpoint: http://121.41.196.178:9100
-  accessKey: cdh
-  secretKey: cdh.2580
-  bucketName: share
-  downloadUri: http://winterchen.com:9101
-  path: http://121.41.196.178:9100
+  endpoint: http://192.168.93.245:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: test
+  downloadUri: http://192.168.93.245:9001
+  path: http://192.168.93.245:9000
 
 swagger:
   enable: true
